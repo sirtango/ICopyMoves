@@ -1,0 +1,2 @@
+# ICopyMoves
+GTP Go Bot

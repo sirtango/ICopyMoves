@@ -1,2 +1,4 @@
 # ICopyMoves
-GTP Go Bot
+
+This is a simple GTP Go bot that will copy all your moves.
+

@@ -4,42 +4,83 @@ from copybot.gtp import intval, colorval, vertexval
 from copybot.gtp import GTPError
 
 
+class Group(object):
+    """Group inside the Board"""
+
+    def __init__(self, board, row, col):
+        self.points = set()
+        self.color = board.state[row][col]
+        self.is_surrounded = self.color is not None
+
+        to_handle = set()
+        to_handle.add((row, col))
+
+        while to_handle:
+            r0, c0 = to_handle.pop()
+            color0 = board.state[r0][c0]
+
+            self.points.add((r0, c0))
+
+            for r1, c1 in [(r0-1, c0), (r0+1, c0), (r0, c0-1), (r0, c0+1)]:
+                if r1 < 0 or r1 >= board.size or c1 < 0 or c1 >= board.size:
+                    continue
+
+                color1 = board.state[r1][c1]
+
+                if not color1:
+                    self.is_surrounded = False
+                elif color1 == color0:
+                    if (r1, c1) not in self.points:
+                        to_handle.add((r1, c1))
+
+
 class Board(object):
-    EMPTY = 0
-    BLACK = 1
-    WHITE = 2
+    """Go board."""
 
     def __init__(self, size):
         self.size = size
-        self.clear()
+        self.history = []
 
     def clear(self):
-        self.state = [[self.EMPTY
+        self.state = [[None
             for x in range(self.size)]
             for x in range(self.size)]
+        self.history = []
 
+    def play(self, color, vertex):
+        self.history.append((color, vertex))
 
-class State(object):
-    def __init__(self):
-        self._size = 9
-        self._board = None
+        if not vertex:
+            return # pass
 
-    @property
-    def size(self):
-        return self._size
+        row, col = vertex
 
-    @size.setter
-    def set_size(self, size):
-        self._size = size
-        if self._board:
-            self._board.size = size
-            self._board.clear()
+        if 0 > row or 0 > col:
+            raise IndexError
+        if self.state[row][col] is not None:
+            raise ValueError
 
-    @property
-    def board(self):
-        if not self._board:
-            self._board = Board(self.size)
-        return self._board
+        self.state[row][col] = color
+
+        for r, c in [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]:
+            if r < 0 or r >= self.size or c < 0 or c >= self.size:
+                continue
+            group = Group(self, r, c)
+            if group.is_surrounded and group.color != color:
+                for r, c in group.points:
+                    self.state[r][c] = None
+
+    def __str__(self):
+        board = ''
+        for row in self.state:
+            for color in row:
+                if color:
+                    board = board + color
+                else:
+                    board = board + ' '
+            board = board + '\n'
+        return board
+
 
 class Engine(object):
     """Bot engine.
@@ -53,25 +94,34 @@ class Engine(object):
 
     def __init__(self):
         self._acceptable_sizes = set((9, ))
-        self._state = State()
+        self._board = Board(9)
 
     def boardsize(self, size):
         size = intval(size)
         if size not in self._acceptable_sizes:
             raise GTPError('unacceptable size')
-        self._state.size = size
+
+        self._board.size = size
+        self._board.clear()
 
     def clear_board(self):
-        self._state.board.clear()
+        self._board.clear()
 
     def play(self, color, vertex):
         color = colorval(color)
         vertex = vertexval(vertex)
 
-        if vertex[0] >= self._state.size \
-        or vertex[1] >= self._state.size:
-            raise GTPError('off board')
+        if vertex and (\
+            vertex[0] >= self._board.size or \
+            vertex[1] >= self._board.size):
+                raise GTPError('off board {},{}'.format(*vertex))
 
-        # TODO
-        #print(color, vertex)
+        self._board.play(color, vertex)
+
+    def genmove(self, color):
+        color = colorval(color)
+        return 'pass'
+
+    def showboard(self):
+        return str(self._board)
 

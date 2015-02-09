@@ -44,7 +44,7 @@ def vertexval(val):
     if number < 1:
         raise GTPError('invalid vertex number: {!r}'.format(val))
 
-    col = ord(letter) - ord('a')
+    col = ord(letter) - (ord('a') if letter < 'i' else ord('b'))
     row = number - 1
 
     return row, col

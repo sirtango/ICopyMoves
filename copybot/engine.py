@@ -16,7 +16,7 @@ class Engine(object):
     version = '0.1'
 
     def __init__(self):
-        self._acceptable_sizes = set((9, ))
+        self._acceptable_sizes = set((9, 13, 19))
         self._board = Board(9)
         self._bots = [CopyBot(self._board)]
 

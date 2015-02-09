@@ -15,11 +15,11 @@ class CopyBot(object):
         # same color that has to generate a move it will
         # pass instead of raiseing an error.
         if last[0] == color:
-            return 'pass'
+            return None
 
         # If the last move is a pass, we pass too.
         if last[1] is None:
-            return 'pass'
+            return None
 
         row, col = self.invert(*last[1])
 

@@ -43,15 +43,18 @@ class Engine(object):
 
         for bot in self._bots:
             point = bot.genmove(color)
+
             if point:
                 break
 
-        if not point:
-            return 'resign'
-
         self._board.play(color, point)
 
-        return point2vertex(point[0], point[1], self._board.size)
+        if point:
+            vertex = point2vertex(point[0], point[1], self._board.size)
+        else:
+            vertex = 'pass'
+
+        return vertex
 
     def showboard(self):
         return str(self._board)

@@ -53,7 +53,7 @@ class Board(object):
         if 0 > row or 0 > col:
             raise IndexError
         if self.state[row][col] is not None:
-            raise ValueError
+            raise ValueError('{},{} already exists'.format(row, col))
 
         self.state[row][col] = color
 
@@ -72,7 +72,7 @@ class Board(object):
                 if color:
                     board = board + color
                 else:
-                    board = board + ' '
+                    board = board + '.'
             board = board + '\n'
         return board
 

@@ -28,7 +28,7 @@ def colorval(val):
     raise GTPError('invalid color: {!r}'.format(val))
 
 
-def vertexval(val):
+def vertexval(val, size):
     """Converto to row,col or raise GTP error."""
     val = val.lower()
 
@@ -44,10 +44,26 @@ def vertexval(val):
     if number < 1:
         raise GTPError('invalid vertex number: {!r}'.format(val))
 
+    row = size - number
     col = ord(letter) - (ord('a') if letter < 'i' else ord('b'))
-    row = number - 1
+
+    if 0 > row or row >= size or 0 > col or col >= size:
+        raise GTPError('off board')
 
     return row, col
+
+
+def point2vertex(row, col, size):
+    row = row * -1 + size
+    col = col + ord('a')
+
+    if col >= ord('i'):
+        col = chr(col + 1)
+    else:
+        col = chr(col)
+
+    return '{}{}'.format(col, row)
+
 
 class Connection(object):
     """Connection to a GTP captable controller."""
